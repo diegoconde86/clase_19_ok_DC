@@ -3,8 +3,11 @@ from turtle import isvisible
 from django.http import HttpResponse
 from django.template import Context,Template,loader
 from django.shortcuts import render
+from django.urls import is_valid_path
 from AppCoder.models import Curso, Familia, Profesor
 from AppCoder.forms import CursoForm, ProfeForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth import login, logout, authenticate
 
  
 def curso(self):
@@ -97,6 +100,54 @@ def buscar(request):
     else:
         return render(request, "AppCoder/busquedacomision.html", {"error":" No se ingreso ninguna Comision"})
 
-    
 
- 
+def leerprofesores(request):
+    profesores= Profesor.objects.all()
+    contexto={"profesores":profesores}
+    return render(request, "AppCoder/leerprofesores.html",contexto)
+
+def eliminarprofesor(request, nombre_profesor):
+    profe= Profesor.objects.get(nombre=nombre_profesor)
+    profe.delete()
+    profesores= Profesor.objects.all()
+    contexto={"profesores":profesores}
+    return render(request, "AppCoder/leerprofesores.html",contexto)
+
+def editarprofesor(request,nombre_profesor):
+    profe= Profesor.objects.get(nombre=nombre_profesor)
+    if request.method == "POST":
+        form = ProfeForm(request.POST)
+        if form.is_valid():
+            info = form.cleaned_data
+            profe.nombre= info["nombre"]
+            profe.apellido= info["apellido"]
+            profe.email= info["email"]
+            profe.profesion= info["profesion"]
+            profe.save()
+            return render(request,"AppCoder/inicio.html")
+    else:
+        form= ProfeForm(initial={"nombre":profe.nombre, "apellido":profe.apellido, "email":profe.email, "profesion":profe.profesion})
+    return render(request, "AppCoder/editarprofesor.html",{"formulario":form, "nombre_profesor":nombre_profesor})
+#-------------------------LOGIN---------------------------------#
+
+def login_request(request):
+    if request.method == "POST":
+        form = AuthenticationForm(request, data=request.POST)
+        if form.is_valid:
+            usu= request.POST['username']
+            contra= request.POST['password']
+            print("HOLA")
+            usuario=authenticate(username=usu,password=contra)
+          
+            if usuario is not None:
+                login(request,usuario)
+                return render(request,"AppCoder/inicio.html", {"mensaje":f"Bienvenido {usuario}."})
+            else:
+                print(usu)
+                print(contra)
+                return render(request,"AppCoder/login.html", {"mensaje":"Error, datos incorrectos."})
+        else:
+                return render(request,"AppCoder/login.html", {"mensaje":"Error, Formulario erroneo."})
+    form=AuthenticationForm()
+    return render(request,"AppCoder/login.html", {'form':form})
+        

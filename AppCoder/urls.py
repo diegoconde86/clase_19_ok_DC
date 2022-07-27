@@ -11,7 +11,15 @@ urlpatterns = [
     path('cursos/', cursos, name='cursos'),
     path('cursoformulario/', cursoformulario, name='cursoformulario'),
     path('profeformulario/', profeformulario, name='profeformulario'),
+    path('eliminarprofesor/<nombre_profesor>', eliminarprofesor, name='eliminarprofesor'),
+    path('editarprofesor/<nombre_profesor>', editarprofesor, name='editarprofesor'),
     path('busquedacomision/', busquedacomision, name='busquedacomision'),
+    path('leerprofesores/', leerprofesores, name='leerprofesores'),
     path('buscar/', buscar, name='buscar'),
     path('', inicio, name ='inicio'),
+
+
+    #------------------------------------------- URLS LOGIN
+
+    path('login/', login_request, name ='login'),
 ]
